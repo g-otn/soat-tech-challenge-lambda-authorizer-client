@@ -1,12 +1,18 @@
 const jwt = require("jsonwebtoken");
 
-// Constants.
+// JWT constants.
 const JWT_PUBLIC_KEY = process.env.JWT_PUBLIC_KEY;
+const JWT_RS256_ALGORITHM = "RS256";
+
+// General constants.
+const STRING_TYPE = "string";
 
 exports.handler = async (event) => {
   // Gets event header.
   const header =
-    typeof event.header === "string" ? JSON.parse(event.header) : event.header;
+    typeof event.header === STRING_TYPE
+      ? JSON.parse(event.header)
+      : event.header;
 
   // Needs to be authorized by a given token.
   const token = header.token;
@@ -15,7 +21,7 @@ exports.handler = async (event) => {
   const jwtSettings = {
     publicKey: JWT_PUBLIC_KEY,
     options: {
-      algorithms: ["RS256"],
+      algorithms: [JWT_RS256_ALGORITHM],
     },
   };
 
