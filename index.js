@@ -1,32 +1,28 @@
-const jwt = require("jsonwebtoken");
+const jwt = require('jsonwebtoken');
 
 // JWT constants.
-const JWT_PUBLIC_KEY = process.env.JWT_PUBLIC_KEY;
-const JWT_RS256_ALGORITHM = "RS256";
+const JWT_PUBLIC_KEY = `-----BEGIN PUBLIC KEY-----\n${process.env.JWT_PUBLIC_KEY}\n-----END PUBLIC KEY-----`;
 
-// General constants.
-const STRING_TYPE = "string";
-
+/**
+ * @param {AWSLambda.APIGatewayRequestAuthorizerEventV2} event
+ * @returns {Promise<boolean>}
+ */
 exports.handler = async (event) => {
-  // Gets event header.
-  const header =
-    typeof event.header === STRING_TYPE
-      ? JSON.parse(event.header)
-      : event.header;
+  const token = event.identitySource?.[0]?.split('Bearer ')?.[1];
 
-  // Needs to be authorized by a given token.
-  const token = header.token;
+  if (!token) {
+    console.log('Missing token');
+    return { isAuthorized: false };
+  }
 
-  // Object that stores values used by 'jsonwebtoken - verify' function call.
   const jwtSettings = {
     publicKey: JWT_PUBLIC_KEY,
     options: {
-      algorithms: [JWT_RS256_ALGORITHM],
+      algorithms: ['RS256'],
     },
   };
 
   try {
-    // Verify and decode the JWT token.
     const decoded = jwt.verify(
       token,
       jwtSettings.publicKey,
@@ -34,11 +30,13 @@ exports.handler = async (event) => {
     );
 
     if (decoded.sub == null) {
-      return false;
+      console.log('Missing sub claim');
+      return { isAuthorized: false };
     }
 
-    return true;
+    return { isAuthorized: true };
   } catch (error) {
-    return false;
+    console.log('Token validation failed', token);
+    return { isAuthorized: false };
   }
 };
