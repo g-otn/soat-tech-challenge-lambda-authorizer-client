@@ -29,14 +29,14 @@ exports.handler = async (event) => {
       jwtSettings.options
     );
 
-    if (decoded.sub == null) {
-      console.log('Missing sub claim');
+    if (!decoded.sub || !Number(decoded.sub)) {
+      console.log('Missing or invalid sub claim');
       return { isAuthorized: false };
     }
 
     return { isAuthorized: true };
   } catch (error) {
-    console.log('Token validation failed', token);
+    console.log('Token verification failed', token);
     return { isAuthorized: false };
   }
 };
