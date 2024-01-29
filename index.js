@@ -29,8 +29,8 @@ exports.handler = async (event) => {
       jwtSettings.options
     );
 
-    if (!decoded.sub || !Number(decoded.sub)) {
-      console.log('Missing or invalid sub claim');
+    if (!decoded.sub) {
+      console.log('Missing or invalid sub claim:', decoded.sub);
       return { isAuthorized: false };
     }
 
